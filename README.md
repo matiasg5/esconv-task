@@ -35,7 +35,7 @@ one job takes a subcommand; run any of them with no arguments for usage.
 | `sampling.py` | `hand32` — the 32-item stratified sample for the kappa/QWK check. `final200` — the 200-item production sample. `combine200` — assembles the run's 400 generations for judging. |
 | `genai.py` | `generate` — response generation across 4 prompt levels (Claude). `judge` — LLM-judge scoring (Gemini for every reported score; Claude for the same-model pilot only). |
 | `human_eval.py` | `parse` — turns the hand-filled blind quiz into scores. `kappa` — Cohen's kappa + QWK, human vs. AI judge, implemented from scratch. |
-| `results.py` | `breakdown` — per-level quality vs. strategy adherence. `xlsx` — builds the two required spreadsheet deliverables. |
+| `results.py` | `breakdown` — per-level quality vs. strategy adherence. `xlsx` — builds the two required spreadsheet deliverables, written to `outputs/`. |
 
 `notebooks/` holds the exploratory analysis (`00`), the split-protocol
 comparison and its significance tests (`01`), and classifier evaluation
@@ -63,7 +63,7 @@ python genai.py generate --csv final_200_new168.csv --levels 2,4 --out final_200
 python sampling.py combine200
 python genai.py judge --provider gemini --csv final_200_prompt_comparison.csv --out final_200_judge_scores_gemini.json
 python results.py breakdown
-python results.py xlsx                       # -> genai_final_level{2,4}.xlsx
+python results.py xlsx                       # -> outputs/genai_final_level{2,4}.xlsx
 ```
 
 ## What is not in this repository

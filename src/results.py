@@ -8,7 +8,8 @@ assignment's required deliverables. Two steps, both reading the same run:
               (judge.py prints only the blended mean, which can hide a level
               that wins on one dimension and loses on the other). This is the
               source of Section 4.4's per-level table.
-  xlsx      : builds the 2 required xlsx files, one per winning prompt level.
+  xlsx      : builds the 2 required xlsx files, one per winning prompt level,
+              written to outputs/ (not outputs/genai/) as the deliverables.
               Spec columns plus a 'condition' column and a 'word_count'
               column, both added deliberately -- see report_notes.md.
 
@@ -235,6 +236,9 @@ def write_xlsx(records, out_path):
 def main_xlsx():
     repo_root = Path(__file__).resolve().parent.parent
     genai_dir = repo_root / "outputs" / "genai"
+    # The two required deliverables are written to outputs/ itself, not the
+    # genai/ working directory, so they're the first thing visible there.
+    deliverable_dir = repo_root / "outputs"
 
     gen_rows = load_generation_rows(genai_dir / "final_200_prompt_comparison.csv")
     judge_scores = load_judge_scores(genai_dir / "final_200_judge_scores_gemini.json")
@@ -251,7 +255,7 @@ def main_xlsx():
         # write_xlsx selects only COLUMNS and drops "level" -- don't del it here (shared dict objects)
         level_records = [r for r in all_records if r["level"] == level]
         assert len(level_records) == 200, f"expected 200 rows for level {level}, got {len(level_records)}"
-        out_path = genai_dir / f"genai_final_level{level}.xlsx"
+        out_path = deliverable_dir / f"genai_final_level{level}.xlsx"
         write_xlsx(level_records, out_path)
         print(f"Saved: {out_path}  (n={len(level_records)}: 200 items, predicted-condition only)")
 

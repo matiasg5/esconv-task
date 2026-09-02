@@ -20,6 +20,10 @@ _to_delete/
 cleanup_plan.md
 review_answers_from_files.md
 
+# Internal working log and the assignment brief -- kept locally, not published
+report_notes.md
+ESConv Task.pdf
+
 # OS noise
 .DS_Store
 Thumbs.db
