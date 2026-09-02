@@ -1,0 +1,25 @@
+.venv/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.env
+
+# Raw dataset -- not redistributed; download ESConv.json into data/raw/
+data/raw/*.json
+
+# Trained model weights. GitHub hard-rejects files over 100MB and these are
+# 268-499MB each. Reproducible from src/train_roberta.py at SEED = 42; the
+# metrics, per-class reports, confusion matrices and predictions they produced
+# are all committed under outputs/, so every reported number stays verifiable.
+outputs/**/best_model/
+*.safetensors
+
+# One-off maintenance scripts and working notes from the cleanup pass
+_to_delete/
+*move*.ps1
+cleanup_plan.md
+review_answers_from_files.md
+
+# OS noise
+.DS_Store
+Thumbs.db

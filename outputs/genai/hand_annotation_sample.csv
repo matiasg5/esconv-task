@@ -1,0 +1,34 @@
+idx,context,true_label,pred_label,correct,confidence
+530,[seeker] i was sad to today [seeker] my partner cheating with me [supporter] Can you tell me a little about what happened?,Affirmation and Reassurance,Question,False,0.32331612706184387
+802,[seeker] True.  I have to change out a few old style electrical plugs.  Maybe I can do something on that?,Affirmation and Reassurance,Information,False,0.3518308103084564
+772,[seeker] we do make the most of our 2 to 3 hours together at night. otherwise i would completely break down,Affirmation and Reassurance,Affirmation and Reassurance,True,0.33686357736587524
+731,[seeker] I'm so anxious. I'm losing my job at the end of the month and I don't know how my resume is going to hold up with so many other people looking for work too!,Affirmation and Reassurance,Affirmation and Reassurance,True,0.2981048822402954
+1719,"[seeker] Yes, i want to do some moderate friendship with them",Information,Reflection of feelings,False,0.28328177332878113
+137,"[seeker] I tried to baker act her after she tried to call the cops on me randomly [seeker] It ended up them asking dumb questions like if she knows what day it is [seeker] letting her free [seeker] somehow ending up with her getting herself hospitalized 2 weeks later 
+for low hemoglobin.",Information,Reflection of feelings,False,0.32998546957969666
+1288,[seeker] Perhaps I should focus on what would be most fun to do.,Information,Information,True,0.551977813243866
+718,[seeker] I agree. Sometimes you just have to take a step back and have a conversation with someone not in the thick of it.,Information,Information,True,0.3218463957309723
+95,"[seeker] I am still working right now.  Luckily, California has plenty of money for bureacrats lie myself. [seeker] I contributed to the marriage for sure. [seeker] I love my wife and my great kids",Others,Affirmation and Reassurance,False,0.3567725718021393
+1315,[seeker] I don’t think I’ve ever tried banana chips! I’ll have to see if my grocery store has got them. Maybe I can get some delivered by the time I’m ready to study [supporter] you can find it in any grocery store easily known as  Plantain chips,Others,Information,False,0.3975880742073059
+1504,"[seeker] Thank you for your time, I'll have to be leaving now, this will help me for sure!",Others,Others,True,0.6934555172920227
+1603,"[seeker] Thank you very much, i wholeheartedly appreciate!",Others,Others,True,0.40824633836746216
+1196,[seeker] i am. but i have a hard time focusing as of late.,Providing Suggestions,Question,False,0.3895033299922943
+682,"[seeker] yes i have , but i scaring to ask them . i never depend on any body since my childhood",Providing Suggestions,Information,False,0.39966368675231934
+1549,[seeker] I have heard the idea of dating ones self [seeker] I haven't been out to eat for over a year due to the pandemic situation [supporter] It can be fun! No decisons on who wants to go where. It is all about you enjoying the moment and your own company!,Providing Suggestions,Providing Suggestions,True,0.3066427409648895
+1367,[seeker] i am depressed so it's hard to get moving on stuff i want to do...i feel so low [supporter] Try to live i future forget past,Providing Suggestions,Providing Suggestions,True,0.3209323585033417
+1566,[seeker] She was not a good person. So it makes it easy to not regret it. but i still feel guilty. guilt caused issues last month when this all started and came to a head. it was a mess. I was a mess. things happened.,Question,Affirmation and Reassurance,False,0.2898234724998474
+1248,"[seeker] Yes, I had a bad sleeping schedule, when I would go to sleep around 2-3am. I now get around 8 hours of sleep but I feel like it isn't enough still. [seeker] Would this relate to a health problem of not being active or maybe stress? [supporter] I used to be a night owl, going to bed early in the morning.  I reset my schedule very gradually.  I went to bed 15 minutes earlier, and set an alarm for 8 hours later.  I did that for 3 days, then I would ratchet it back another 15 minutes.   It was a gradual process and the only way I could fix it.",Question,Providing Suggestions,False,0.30188706517219543
+984,[seeker] I am so very angry and disgusted with my life,Question,Question,True,0.4404951333999634
+286,[seeker] I'm doing ok,Question,Question,True,0.7351978421211243
+681,[seeker] yes i updated resume but my old company is not interested to give my experience letter,Reflection of feelings,Information,False,0.25927168130874634
+855,"[seeker] That's why I'm here ;). You are being very helpful, thank you! It's just nice to be able to tell people what I am worried about and not have them think that I am just being silly.",Reflection of feelings,Others,False,0.4300457835197449
+1552,"[seeker] Thank you for letting me talk about this. It is a touchy topic, affairs. My heart was so loved during that time but I always told him that if he needed me to step back, I would. It has been difficult on both of us. [seeker] Being a parent, having the families meshed together, homes, work, etc.... I can understand why he feels he should try again.",Reflection of feelings,Reflection of feelings,True,0.2238624393939972
+383,"[seeker] No. I fear that I might get turned down. They are usually the ones that ask me out, and they haven't been doing that for weeks.",Reflection of feelings,Reflection of feelings,True,0.2584235966205597
+406,[seeker] Well I think I rather not accept it and just end my life. Seems easier.,Restatement or Paraphrasing,Self-disclosure,False,0.2661901116371155
+1709,[seeker] What are the other ways to avoid the sick feeling of this pandemic ? [supporter] Are you a real person or a computer program?,Restatement or Paraphrasing,Providing Suggestions,False,0.26782476902008057
+1443,"[seeker] Ok. I have a friend who I've known a long time, who is one of my closest friends, but who is extremely insecure. She constantly seeks affirmation that I love and care for her, even though she should KNOW I do, since we have been friends for so long.",Restatement or Paraphrasing,Restatement or Paraphrasing,True,0.4051131010055542
+658,[seeker] i'm having difficulty dealing with a coworker that doesn't take constructive feedback on standard work procedures well and is now starting her own investigation.,Restatement or Paraphrasing,Restatement or Paraphrasing,True,0.620832622051239
+800,[seeker] Do you use any other social media for connecting with new people.,Self-disclosure,Providing Suggestions,False,0.5673607587814331
+53,[seeker] Why do you think it will get better?,Self-disclosure,Information,False,0.45232531428337097
+1659,[seeker] Oh really? I hope so I'm worried that it isn't natural since I haven't always been like this,Self-disclosure,Self-disclosure,True,0.5186712741851807
+1261,[seeker] I am feeling pretty down about my appearance.,Self-disclosure,Self-disclosure,True,0.4097404479980469

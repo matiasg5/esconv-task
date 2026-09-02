@@ -1,0 +1,16 @@
+# Normalize line endings so the CRLF/LF warnings stop and diffs stay clean
+# across machines. Text files are stored LF in the repo and checked out with
+# the platform's native endings.
+* text=auto
+
+*.py    text eol=lf
+*.md    text eol=lf
+*.json  text eol=lf
+*.csv   text eol=lf
+*.txt   text eol=lf
+*.jsonl text eol=lf
+*.ipynb text eol=lf
+
+*.xlsx  binary
+*.png   binary
+*.pdf   binary

@@ -1,0 +1,82 @@
+1251/1724 test predictions are wrong. 10 items, selection=diverse.
+
+=== Item 1: idx=231 conversation_id=186 turn_index=10 problem_type=ongoing depression ===
+  confidence: 0.8814
+  true (gold) strategy: Restatement or Paraphrasing
+  predicted strategy:   Self-disclosure
+  context:
+    [seeker] I see. Is this something that you've done to make money?
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 2: idx=1624 conversation_id=1284 turn_index=2 problem_type=job crisis ===
+  confidence: 0.8784
+  true (gold) strategy: Restatement or Paraphrasing
+  predicted strategy:   Question
+  context:
+    [seeker] I lost my job recently that's why I'm very sad. [supporter] Hello
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 3: idx=1317 conversation_id=1098 turn_index=22 problem_type=academic pressure ===
+  confidence: 0.8558
+  true (gold) strategy: Providing Suggestions
+  predicted strategy:   Others
+  context:
+    [seeker] Thank you. Enjoy the rest of your day!
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 4: idx=987 conversation_id=758 turn_index=12 problem_type=ongoing depression ===
+  confidence: 0.8527
+  true (gold) strategy: Providing Suggestions
+  predicted strategy:   Restatement or Paraphrasing
+  context:
+    [seeker] Usually I keep quiet but if I say something it will be what i do for family and how he doesn't help me or respect me
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 5: idx=285 conversation_id=198 turn_index=45 problem_type=academic pressure ===
+  confidence: 0.8391
+  true (gold) strategy: Information
+  predicted strategy:   Others
+  context:
+    [seeker] You too Merry Christmas
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 6: idx=789 conversation_id=552 turn_index=25 problem_type=job crisis ===
+  confidence: 0.8335
+  true (gold) strategy: Reflection of feelings
+  predicted strategy:   Others
+  context:
+    [seeker] Thank you so much. Take care. Be safe.
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 7: idx=241 conversation_id=186 turn_index=32 problem_type=ongoing depression ===
+  confidence: 0.8157
+  true (gold) strategy: Restatement or Paraphrasing
+  predicted strategy:   Others
+  context:
+    [seeker] I appreciate your help. [seeker] Have a good night!
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 8: idx=1226 conversation_id=958 turn_index=45 problem_type=Alcohol Abuse ===
+  confidence: 0.8152
+  true (gold) strategy: Self-disclosure
+  predicted strategy:   Others
+  context:
+    [seeker] Yes, have a wonderful evening! [seeker] Goodbye
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 9: idx=924 conversation_id=704 turn_index=46 problem_type=ongoing depression ===
+  confidence: 0.8076
+  true (gold) strategy: Affirmation and Reassurance
+  predicted strategy:   Others
+  context:
+    [seeker] well tahnk you for your time. [seeker] take care.
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____
+=== Item 10: idx=648 conversation_id=466 turn_index=3 problem_type=job crisis ===
+  confidence: 0.7944
+  true (gold) strategy: Reflection of feelings
+  predicted strategy:   Question
+  context:
+    [seeker] Not so good unfortunately.
+  your read (fill in by hand -- error vs. ground truth, and why you think it happened):
+    ____

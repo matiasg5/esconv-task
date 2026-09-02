@@ -1,0 +1,17 @@
+task=8class  checkpoint=..\outputs\8class\lr3e-5\best_model  name=distilbert
+test macro-F1 = 0.2174
+
+                             precision    recall  f1-score   support
+
+                   Question       0.47      0.42      0.44       334
+Restatement or Paraphrasing       0.13      0.28      0.17       126
+     Reflection of feelings       0.04      0.02      0.03       142
+            Self-disclosure       0.21      0.17      0.19       169
+Affirmation and Reassurance       0.17      0.15      0.16       267
+      Providing Suggestions       0.28      0.19      0.23       283
+                Information       0.08      0.26      0.12        96
+                     Others       0.50      0.33      0.40       307
+
+                   accuracy                           0.25      1724
+                  macro avg       0.24      0.23      0.22      1724
+               weighted avg       0.29      0.25      0.26      1724

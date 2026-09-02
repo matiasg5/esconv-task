@@ -1,0 +1,134 @@
+[
+ {
+  "idx": "231",
+  "level": "1",
+  "strategy": "Restatement or Paraphrasing",
+  "quality": 3,
+  "strategy_adherence": 3,
+  "reasoning": "The response effectively uses paraphrasing by restating the seeker's question in a clarified form ('you're asking whether I've personally engaged in this activity as a way to earn income'), which demonstrates understanding. However, the addition of the AI clarification, while necessary and appropriate given the context, somewhat dilutes the core emotional support function by pivoting away from the seeker's concern. The tone is clear and conversational but feels slightly formal/explanatory rather than naturally flowing in an ongoing dialogue. For strategy adherence, the paraphrasing element is strong, but the response goes beyond the target strategy into explanation, which reduces pure adherence to the restatement/paraphrasing approach.",
+  "input_tokens": 382,
+  "output_tokens": 168,
+  "latency_seconds": 2.709
+ },
+ {
+  "idx": "231",
+  "level": "2",
+  "strategy": "Restatement or Paraphrasing",
+  "quality": 2,
+  "strategy_adherence": 4,
+  "reasoning": "The response demonstrates strong strategy adherence by clearly restating the seeker's question in a paraphrased form ('wondering whether I've personally taken on work like this to earn money'). However, the tone feels somewhat formal and artificial for a supportive conversation - the phrase 'I'd be happy to help clarify what you're asking about' reads like a stilted customer service response rather than natural peer-to-peer messaging. The response also introduces an unnecessary meta-layer by questioning whether it understood correctly, when the seeker's original message was already quite clear and direct. While it executes the paraphrasing strategy well, it sacrifices conversational naturalness in doing so.",
+  "input_tokens": 369,
+  "output_tokens": 165,
+  "latency_seconds": 2.687
+ },
+ {
+  "idx": "231",
+  "level": "3",
+  "strategy": "Restatement or Paraphrasing",
+  "quality": 3,
+  "strategy_adherence": 4,
+  "reasoning": "The response demonstrates clear restatement by clarifying the seeker's question about financial motivation, rephrasing 'making money' into 'making money has been part of the reason for doing this' and noting it as an 'important question about motivation.' However, the tone is somewhat formal and analytical ('That sounds like an important question about motivation here') rather than conversational and natural. The addition of metacognitive framing ('That sounds like...') feels slightly stilted for a natural chat exchange and adds interpretive layers beyond simple paraphrasing. The strategy is well-executed in substance but slightly overextended in delivery.",
+  "input_tokens": 362,
+  "output_tokens": 159,
+  "latency_seconds": 2.801
+ },
+ {
+  "idx": "231",
+  "level": "4",
+  "strategy": "Restatement or Paraphrasing",
+  "quality": 3,
+  "strategy_adherence": 4,
+  "reasoning": "The response demonstrates strong strategy adherence by restating the seeker's question in a clarified form, which effectively shows understanding of what was asked. However, the quality is diminished by the somewhat awkward phrasing 'earned money this way myself' and the addition of a question mark that turns it into an interrogative rather than a confident restatement. While the tone is conversational enough, it reads slightly stilted and could be more natural\u2014a supportive conversation partner might phrase this more smoothly, such as 'So you're wondering if I've made money doing this myself?' The response achieves the paraphrasing goal but does so with slightly unnatural wording.",
+  "input_tokens": 349,
+  "output_tokens": 165,
+  "latency_seconds": 2.544
+ },
+ {
+  "idx": "757",
+  "level": "1",
+  "strategy": "Question",
+  "quality": 5,
+  "strategy_adherence": 5,
+  "reasoning": "The response demonstrates strong strategy adherence by explicitly asking a clarifying question ('What's been the hardest part of your day so far?') to gather information about the seeker's situation and feelings, which directly fulfills the target Question strategy. The tone is warm and conversational, reading naturally as one person reaching out to another in an ongoing chat, with the supportive framing ('I'm here for you') and the relatable aside about talking things through enhancing its authenticity without feeling overly formal or scripted. The response is appropriately helpful and sets up space for the seeker to elaborate on their emotional state.",
+  "input_tokens": 365,
+  "output_tokens": 151,
+  "latency_seconds": 2.505
+ },
+ {
+  "idx": "757",
+  "level": "2",
+  "strategy": "Question",
+  "quality": 5,
+  "strategy_adherence": 5,
+  "reasoning": "The response demonstrates strong quality with natural, conversational tone that feels like authentic peer-to-peer messaging. It opens with availability ('I'm here to listen'), then directly asks an open-ended question ('What's been making today particularly rough for you?'), and adds a supportive rationale for why talking helps. For strategy adherence, this response executes the Question strategy very well\u2014it clearly seeks to clarify the seeker's situation and feelings through an open-ended inquiry, which is the core of this strategy. The follow-up rationale ('Sometimes talking through what's on your mind can help a bit') reinforces the supportive intent without detracting from the questioning approach.",
+  "input_tokens": 357,
+  "output_tokens": 165,
+  "latency_seconds": 2.536
+ },
+ {
+  "idx": "757",
+  "level": "3",
+  "strategy": "Question",
+  "quality": 5,
+  "strategy_adherence": 5,
+  "reasoning": "This response directly implements the Question strategy by asking a clarifying question that invites the seeker to share more about their difficult day. The phrasing is natural and conversational, avoiding overly clinical language while still being supportive. It demonstrates genuine interest in understanding their specific situation, which is the core purpose of the Question strategy. The tone reads authentically like a friend or supporter asking follow-up, building naturally on the supporter's previous empathetic acknowledgment.",
+  "input_tokens": 342,
+  "output_tokens": 118,
+  "latency_seconds": 2.105
+ },
+ {
+  "idx": "757",
+  "level": "4",
+  "strategy": "Question",
+  "quality": 5,
+  "strategy_adherence": 5,
+  "reasoning": "This response directly implements the target strategy by asking an open-ended question designed to clarify and understand the seeker's situation and feelings. The phrasing is natural, conversational, and shows genuine interest without being overly formal or robotic. It builds appropriately on the supporter's previous acknowledgment and invites the seeker to elaborate on their emotional state. The tone feels like authentic peer-to-peer support, and the question is specific enough to be helpful while remaining open-ended.",
+  "input_tokens": 342,
+  "output_tokens": 124,
+  "latency_seconds": 2.05
+ },
+ {
+  "idx": "1317",
+  "level": "1",
+  "strategy": "Providing Suggestions",
+  "quality": 4,
+  "strategy_adherence": 1,
+  "reasoning": "Quality-wise, the response is warm, genuine, and appropriate for a farewell message. It reads naturally as a supportive friend's parting words with good tone. However, strategy_adherence is very weak: the target strategy specifically calls for 'offering a concrete suggestion or possible course of action to help the seeker.' This response provides no concrete suggestions or actionable advice\u2014it merely offers open-ended support and well-wishes. While it's a nice closing message, it fundamentally fails to execute the assigned strategy of providing suggestions.",
+  "input_tokens": 364,
+  "output_tokens": 139,
+  "latency_seconds": 2.375
+ },
+ {
+  "idx": "1317",
+  "level": "2",
+  "strategy": "Providing Suggestions",
+  "quality": 2,
+  "strategy_adherence": 3,
+  "reasoning": "The response attempts to provide concrete suggestions (reaching out to friends/counselors, taking a walk, calling someone) which directly aligns with the 'Providing Suggestions' strategy. However, the seeker has already said goodbye ('Enjoy the rest of your day!'), making a substantive intervention at this point somewhat awkward and potentially pushy rather than conversational. The tone feels slightly preachy with phrases like 'You've got this!' and 'can really help,' which, while encouraging, reads more like generic supportive messaging than a natural peer conversation. The suggestions themselves are appropriate and helpful, but the timing and conversational appropriateness are problematic given the seeker's clear closing statement.",
+  "input_tokens": 362,
+  "output_tokens": 170,
+  "latency_seconds": 2.662
+ },
+ {
+  "idx": "1317",
+  "level": "3",
+  "strategy": "Providing Suggestions",
+  "quality": 4,
+  "strategy_adherence": 5,
+  "reasoning": "This response maintains a warm, conversational tone appropriate for the end of a supportive chat exchange, with natural phrasing like 'I'm glad I could help' that feels genuine rather than scripted. The suggestion to 'jot down one small win' is concrete, actionable, and directly aligned with the target strategy of providing suggestions\u2014it offers a specific course of action the seeker can take going forward. The advice is also emotionally supportive in nature, focusing on building momentum through positive reinforcement. However, the execution feels slightly formulaic with the phrase 'one thing that might support you going forward' which introduces the suggestion somewhat mechanically rather than organically integrating it into the farewell.",
+  "input_tokens": 359,
+  "output_tokens": 170,
+  "latency_seconds": 2.679
+ },
+ {
+  "idx": "1317",
+  "level": "4",
+  "strategy": "Providing Suggestions",
+  "quality": 4,
+  "strategy_adherence": 1,
+  "reasoning": "The response is warm, natural, and appropriate for closing a supportive conversation, with genuine tone that feels like authentic human interaction. However, it fails to execute the target strategy of 'Providing Suggestions' - it contains no concrete suggestions or courses of action to help the seeker. Instead, it offers a supportive closing statement that would be better categorized under strategies like Affirming or Offering Hope. The response is high quality as a conversational closing but fundamentally misaligned with the assigned strategy.",
+  "input_tokens": 351,
+  "output_tokens": 128,
+  "latency_seconds": 2.144
+ }
+]

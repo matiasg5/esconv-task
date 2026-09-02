@@ -1,0 +1,36 @@
+Mini-sample prompt-level comparison -- blinded ranking quiz
+============================================================
+For each item, read the conversation + target strategy, then RANK all
+4 responses (A/B/C/D) from best (1) to worst (4) at executing that
+strategy. Options are shuffled per item -- don't assume a fixed order.
+
+--- Item idx=231  strategy='Restatement or Paraphrasing' ---
+Conversation: [seeker] I see. Is this something that you've done to make money?
+
+  A. You're asking whether I've personally earned money this way myself?
+  B. So it sounds like you're wondering whether I've personally taken on work like this to earn money? I'd be happy to help clarify what you're asking about.
+  C. So if I'm understanding correctly, you're asking whether I've personally engaged in this activity as a way to earn income? I want to clarify that I'm an AI, so I don't have personal experiences or earn money.
+  D. So you're asking whether making money has been part of the reason for doing this? That sounds like an important question about motivation here.
+
+Your ranking, best to worst (e.g. "C, A, D, B"): "A, B, D, C"
+
+--- Item idx=757  strategy='Question' ---
+Conversation: [seeker] having a rough day. [supporter] I am sorry you are having a rough day.
+
+  A. What's been the hardest part of your day so far?
+  B. What's been the hardest part of your day so far?
+  C. I'm here for you. What's been the hardest part of your day so far? Sometimes talking through what's weighing on us can help lighten the load a bit.
+  D. I'm here to listen. What's been making today particularly rough for you? Sometimes talking through what's on your mind can help a bit.
+
+Your ranking, best to worst (e.g. "C, A, D, B"): "D, B, A, C"
+
+--- Item idx=1317  strategy='Providing Suggestions' ---
+Conversation: [seeker] Thank you. Enjoy the rest of your day!
+
+  A. Thank you! I hope our conversation was helpful. Feel free to reach out anytime you need assistance, suggestions, or just want to chat. Wishing you all the best with whatever you're working on!
+  B. I'm glad I could help! Before you go, one thing that might support you going forward: consider jotting down one small win from today, however tiny. It builds momentum.
+  C. Before you go, consider reaching out to a trusted friend or counselor if things feel overwhelming. Taking one small step today—like a walk or calling someone—can really help. You've got this!
+  D. You're welcome! I'm glad we could talk through this together. Wishing you all the best as you move forward with what comes next.
+
+Your ranking, best to worst (e.g. "C, A, D, B"): "A, C, B, D"
+

@@ -1,0 +1,12 @@
+task=3class  checkpoint=../outputs/3class/roberta/lr1e-5_wd0.01/best_model  name=roberta
+test macro-F1 = 0.4463
+
+              precision    recall  f1-score   support
+
+      Action       0.37      0.42      0.39       379
+  Comforting       0.37      0.47      0.41       436
+ Exploration       0.63      0.46      0.53       602
+
+    accuracy                           0.45      1417
+   macro avg       0.46      0.45      0.45      1417
+weighted avg       0.48      0.45      0.46      1417
