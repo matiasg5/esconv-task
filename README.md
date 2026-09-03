@@ -9,6 +9,8 @@ Two subtasks on the ESConv corpus (Liu et al., 2021):
    conditioned on a target strategy, scored by an LLM judge and by human
    annotation, with the required kappa/QWK agreement check.
 
+The full write-up is [`ESConv_Report_Matias_Guernik.pdf`](ESConv_Report_Matias_Guernik.pdf), included in this repository.
+
 ## Setup
 
 ```bash
