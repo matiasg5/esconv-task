@@ -1,13 +1,12 @@
 """
 src/train_roberta.py
 
-Trains RoBERTa-base for the 8-class or 3-class strategy-prediction task.
-Default LR/weight_decay reuse the DistilBERT sweep's winner (see
-report_notes.md); --lr/--weight_decay override for one-off runs, each
-writing to its own subfolder. Final checkpoints (lr=1e-5, wd=0.01) use
-speaker tags (StrategyDataset) -- the only tagged-input model in this repo.
-Trains/evaluates on train+val only; test is untouched here (see
-evaluate_checkpoints.py).
+Trains a RoBERTa-base model for the 8-class or 3-class strategy prediction task. 
+Trains and evaluates strictly on train/val splits, leaving the test set untouched.
+
+Defaults to the optimal hyperparameters from the DistilBERT sweep. Final 
+checkpoints use speaker-tagged inputs, making this the only tagged-input 
+model in the repository. Custom overrides save to isolated subfolders.
 
 Usage:
     python train_roberta.py --task 8class
