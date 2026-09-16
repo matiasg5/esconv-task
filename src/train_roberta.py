@@ -75,6 +75,11 @@ TASKS = {
 
 
 def set_seed(seed=SEED):
+    """Seeds Python, NumPy and torch (CPU + CUDA). cudnn determinism is not forced,
+    so runs are seeded but not bit-identical on GPU.
+
+    Called by: main().
+    """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
@@ -82,7 +87,18 @@ def set_seed(seed=SEED):
 
 
 class StrategyDataset(Dataset):
+    """Training dataset: renders each context to speaker-tagged text once, then
+    tokenises lazily per item. Tags are hardcoded on -- the final checkpoints are
+    the only tagged-input models in this repo.
+
+    Called by: main(), for the train and val sets.
+    """
+
     def __init__(self, examples, label_key, tokenizer, max_length=MAX_SEQ_LEN):
+        """Stores the rendered texts and integer labels; no tokenising yet.
+
+        Called by: main(), when building the train/val datasets.
+        """
         # speaker tags on ("[seeker]"/"[supporter]" prefixes) -- see report_notes.md
         self.texts = [flatten_context(ex["context"], include_speaker_tags=True) for ex in examples]
         self.labels = [ex[label_key] for ex in examples]
@@ -90,9 +106,18 @@ class StrategyDataset(Dataset):
         self.max_length = max_length
 
     def __len__(self):
+        """Number of training examples -- what the DataLoader iterates over.
+
+        Called by: the DataLoader, to size the epoch.
+        """
         return len(self.texts)
 
     def __getitem__(self, idx):
+        """Tokenises one example into fixed-length (96,) input_ids and
+        attention_mask plus a scalar label.
+
+        Called by: the DataLoader, once per item per epoch.
+        """
         enc = self.tokenizer(
             self.texts[idx],
             truncation=True,
@@ -108,6 +133,11 @@ class StrategyDataset(Dataset):
 
 
 def compute_class_weights(labels, n_classes):
+    """Balanced class weights, n_samples / (n_classes * count). A class at exactly
+    its even share gets 1.0; rarer classes get more. Fed to CrossEntropyLoss.
+
+    Called by: main().
+    """
     counts = np.bincount(labels, minlength=n_classes)
     n_samples = len(labels)
     weights = n_samples / (n_classes * np.maximum(counts, 1))
@@ -115,6 +145,11 @@ def compute_class_weights(labels, n_classes):
 
 
 def run_epoch(model, loader, device, optimizer=None, scheduler=None, loss_fn=None):
+    """One pass over a loader, training or evaluating depending on whether an
+    optimizer was passed. Returns (average loss, macro-F1).
+
+    Called by: main().
+    """
     is_train = optimizer is not None
     model.train() if is_train else model.eval()
 
@@ -148,6 +183,12 @@ def run_epoch(model, loader, device, optimizer=None, scheduler=None, loss_fn=Non
 
 
 def main():
+    """Fine-tunes the model for one task: builds the split, trains with early
+    stopping on validation macro-F1, and saves the best checkpoint. Test is never
+    touched here.
+
+    Called by: the __main__ guard at the bottom of the file.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", choices=["8class", "3class"], required=True)
     parser.add_argument("--lr", type=float, default=None,
