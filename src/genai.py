@@ -178,7 +178,10 @@ MAX_WORDS = 40
 
 
 def build_prompt(level, strategy, context):
-    """Returns (system_prompt, user_prompt) for one of the 4 detail levels."""
+    """Returns (system_prompt, user_prompt) for one of the 4 detail levels.
+
+    Called by: main_generate().
+    """
     definition = STRATEGY_DEFINITIONS[strategy]
     guidance = STRATEGY_GUIDANCE[strategy]
 
@@ -269,7 +272,10 @@ WORD_COUNT_LEAK_PATTERN = re.compile(r"\s*\(\d+\s*words?\)\.?\s*$", re.IGNORECAS
 
 def strip_meta_commentary(text):
     """Strip a trailing self-reported word-count annotation. Returns
-    (cleaned_text, was_stripped)."""
+    (cleaned_text, was_stripped).
+
+    Called by: main_generate().
+    """
     cleaned = WORD_COUNT_LEAK_PATTERN.sub("", text).strip()
     return cleaned, cleaned != text
 
@@ -282,12 +288,20 @@ LEADING_HEADER_PATTERN = re.compile(r"^#{1,6}[ \t]*\S[^\n]*\n+", re.MULTILINE)
 
 def strip_leading_header(text):
     """Strip a leading markdown header line (e.g. '# Response\\n\\n').
-    Returns (cleaned_text, was_stripped)."""
+    Returns (cleaned_text, was_stripped).
+
+    Called by: main_generate().
+    """
     cleaned = LEADING_HEADER_PATTERN.sub("", text, count=1).strip()
     return cleaned, cleaned != text
 
 
 def generate(client, model, system, user, max_tokens=100):
+    """One Claude call. Returns (text, input tokens, output tokens, latency) -- the
+    token and timing figures feed the report's cost/time table.
+
+    Called by: main_generate().
+    """
     call_start = time.time()  # real per-call latency, for the report's cost/time table
     response = client.messages.create(
         model=model,
@@ -303,7 +317,10 @@ def generate(client, model, system, user, max_tokens=100):
 def load_competition_items(csv_path):
     """Loads a hand_annotation_sample.csv-format file. Returns items with
     both true_label and pred_label -- main() picks which to target per
-    --conditions."""
+    --conditions.
+
+    Called by: main_generate().
+    """
     items = []
     with open(csv_path, newline="", encoding="utf-8") as f:
         for row in csv.DictReader(f):
@@ -318,6 +335,11 @@ def load_competition_items(csv_path):
 
 
 def main_generate():
+    """generate subcommand: drafts a supporter response for every (item, prompt level)
+    pair and writes them to a comparison CSV, with running token and cost totals.
+
+    Called by: main(), via the "generate" subcommand.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--model", default="claude-haiku-4-5")
     parser.add_argument("--csv", default=None, help="hand_annotation_sample.csv-format file; omit for the 3-item mini-sample.")
@@ -424,6 +446,11 @@ JUDGE_SYSTEM = (
 # --- shared: judge prompt + JSON parsing (identical to both originals) -----
 
 def build_judge_prompt(context, strategy, definition, response):
+    """Builds the judge prompt: quality and strategy adherence on 1-5, with per-score
+    anchors and a hard cap for leaked system/formatting artifacts.
+
+    Called by: run_claude(), run_gemini().
+    """
     # "reasoning" is deliberately the FIRST field in the required JSON object,
     # not the last -- chain-of-thought via field order (Zheng et al. 2023,
     # G-Eval/Liu et al. 2023 EMNLP), see report_notes.md.
@@ -482,7 +509,10 @@ def extract_json_object(text):
     """Real observed failure mode (mini-sample run 2, 9/12 judge calls): the
     model wraps its JSON reply in markdown code fences (```json ... ```)
     despite being told not to. Strips a leading/trailing fence if present;
-    falls back to the raw text otherwise."""
+    falls back to the raw text otherwise.
+
+    Called by: run_claude(), run_gemini().
+    """
     stripped = text.strip()
     fence_match = re.match(r"^```(?:json)?\s*\n?(.*?)\n?```\s*$", stripped, re.DOTALL)
     if fence_match:
@@ -491,6 +521,10 @@ def extract_json_object(text):
 
 
 def load_rows(csv_path):
+    """Reads a prompt-comparison CSV into a list of dicts.
+
+    Called by: run_claude(), run_gemini().
+    """
     with open(csv_path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
@@ -498,6 +532,11 @@ def load_rows(csv_path):
 # --- provider=claude: mini-sample blind ranking quiz + judging -------------
 
 def build_blind_ranking_quiz(rows, seed):
+    """Builds the blinded mini-sample quiz: the four prompt levels for each item are
+    shuffled into A-D. Returns the quiz plus the letter-to-level key.
+
+    Called by: run_claude().
+    """
     by_idx = defaultdict(list)
     for row in rows:
         by_idx[row["idx"]].append(row)
@@ -523,6 +562,10 @@ def build_blind_ranking_quiz(rows, seed):
 
 
 def write_ranking_quiz_file(quiz_items, out_path):
+    """Writes the blinded quiz as a plain-text file to be filled in by hand.
+
+    Called by: run_claude().
+    """
     with open(out_path, "w", encoding="utf-8") as f:
         f.write("Mini-sample prompt-level comparison -- blinded ranking quiz\n")
         f.write("=" * 60 + "\n")
@@ -538,8 +581,11 @@ def write_ranking_quiz_file(quiz_items, out_path):
 
 
 def run_claude(args, repo_root):
-    import anthropic
+    """Claude-as-judge: the same-model pilot only. Also writes the blind ranking quiz
+    and its key. Every reported judge score comes from Gemini, not this.
 
+    Called by: main_judge().
+    """
     csv_path = Path(args.csv) if args.csv else repo_root / "outputs" / "genai" / "mini_sample_prompt_comparison.csv"
     rows = load_rows(csv_path)
     out_dir = repo_root / "outputs" / "genai"
@@ -603,6 +649,11 @@ def run_claude(args, repo_root):
 # --- provider=gemini: independent judging of an arbitrary CSV --------------
 
 def run_gemini(args, repo_root):
+    """Gemini-as-judge: scores every response on quality and strategy adherence, and
+    writes the JSON used for all reported results.
+
+    Called by: main_judge().
+    """
     from google import genai
     from google.genai import types
 
@@ -708,6 +759,11 @@ def run_gemini(args, repo_root):
 
 
 def main_judge():
+    """judge subcommand: picks the provider (gemini for reported scores, claude for
+    the same-model pilot) and runs it.
+
+    Called by: main(), via the "judge" subcommand.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--provider", choices=["claude", "gemini"], required=True)
     parser.add_argument("--model", default=None, help="Default: claude-haiku-4-5 or gemini-2.5-flash per --provider.")
@@ -735,6 +791,11 @@ COMMANDS = {
 
 
 def main():
+    """Subcommand dispatcher: prints usage on an unknown command, otherwise strips it
+    off sys.argv so each step keeps its own argparse.
+
+    Called by: the __main__ guard at the bottom of the file.
+    """
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         print("usage: python %s <command> [options]\n" % Path(__file__).name)
         print("commands:")

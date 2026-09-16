@@ -29,13 +29,14 @@ Usage:
 """
 
 import argparse
+import csv
+import json
 import sys
 import time
 from pathlib import Path
+
 import pandas as pd
 from sklearn.metrics import f1_score, classification_report, confusion_matrix
-import json
-import csv
 
 # torch / transformers / captum are imported inside the two commands that need
 # them (test, interpret), so `error-sample` -- which only reads CSVs -- runs
@@ -77,11 +78,29 @@ TASKS = {
 
 def _make_inference_dataset_cls():
     """Defined lazily: subclassing torch's Dataset requires torch at
-    class-creation time, and error-sample must run without it."""
+    class-creation time, and error-sample must run without it. torch itself is
+    imported here too, not in main_test -- a function-level import binds the
+    name locally, so __getitem__ below can only see it via this scope.
+
+    Called by: main_test().
+    """
+    import torch
     from torch.utils.data import Dataset
 
     class InferenceDataset(Dataset):
+        """Feeds examples to the DataLoader for inference: renders each context
+        to text once, tokenises one item at a time. include_speaker_tags is a
+        parameter here (unlike training) because the DistilBERT checkpoints were
+        trained untagged.
+
+        Called by: main_test(), via _make_inference_dataset_cls().
+        """
+
         def __init__(self, examples, label_key, tokenizer, max_length=MAX_SEQ_LEN, include_speaker_tags=False):
+            """Renders and stores the context texts and labels; no tokenising yet.
+
+            Called by: the DataLoader, once per InferenceDataset.
+            """
             # must match how the checkpoint was trained -- pass --speaker_tags for RoBERTa's final retrain
             self.contexts = [flatten_context(ex["context"], include_speaker_tags=include_speaker_tags) for ex in examples]
             self.labels = [ex[label_key] for ex in examples]
@@ -89,9 +108,18 @@ def _make_inference_dataset_cls():
             self.max_length = max_length
 
         def __len__(self):
+            """Number of examples -- what the DataLoader iterates over.
+
+            Called by: the DataLoader, to size the epoch.
+            """
             return len(self.contexts)
 
         def __getitem__(self, idx):
+            """Tokenises one example to fixed-length (96,) tensors: input_ids,
+            attention_mask and a scalar label.
+
+            Called by: the DataLoader, once per item per pass.
+            """
             enc = self.tokenizer(
                 self.contexts[idx],
                 truncation=True,
@@ -106,8 +134,15 @@ def _make_inference_dataset_cls():
             }
 
     return InferenceDataset
+
+
 def main_test():
-    import numpy as np
+    """The official test-set evaluation for one checkpoint: rebuilds the same
+    held-out split training used, runs a forward-only pass, and writes
+    test_predictions.csv, classification_report.txt and confusion_matrix.csv.
+
+    Called by: main(), via the "test" subcommand.
+    """
     import torch
     from torch.utils.data import DataLoader
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
@@ -214,6 +249,11 @@ N_IG_STEPS = 50         # integrated gradients path resolution -- captum's own d
 
 
 def _select_confident(task, correct, n):
+    """Reads test_predictions.csv and returns the n most-confident rows that were
+    either right or wrong, per `correct`. Shared by the two wrappers below.
+
+    Called by: select_confident_correct(), select_confident_wrong().
+    """
     path = Path(__file__).resolve().parent.parent / "outputs" / task / "roberta" / "test_predictions.csv"
     df = pd.read_csv(path)
     subset = df[df["correct"] == correct].sort_values("confidence", ascending=False)
@@ -221,15 +261,26 @@ def _select_confident(task, correct, n):
 
 
 def select_confident_wrong(task, n=N_WRONG_EXAMPLES):
+    """The examples to attribute: confident mistakes, where the model committed.
+
+    Called by: main_interpret().
+    """
     return _select_confident(task, correct=False, n=n)
 
 
 def select_confident_correct(task, n=N_CORRECT_EXAMPLES):
+    """Contrast set: confident and correct, so error-specific patterns stand out.
+
+    Called by: main_interpret().
+    """
     return _select_confident(task, correct=True, n=n)
 
 
 def build_baseline_input(input_ids, tokenizer):
-    """All-pad baseline; special tokens (CLS/SEP/etc.) kept as-is."""
+    """All-pad baseline; special tokens (CLS/SEP/etc.) kept as-is.
+
+    Called by: process_examples().
+    """
     special_ids = set(tokenizer.all_special_ids)
     ref_ids = input_ids.clone()
     for i in range(input_ids.shape[1]):
@@ -241,8 +292,10 @@ def build_baseline_input(input_ids, tokenizer):
 def process_examples(examples, model, tokenizer, lig, labels, device):
     """Runs IG + occlusion for one group of examples. Returns (records,
     occlusion_summaries, viz_data) -- records feed captum's HTML renderer,
-    viz_data is the plain-JSON version the notebook renders directly."""
-    import numpy as np
+    viz_data is the plain-JSON version the notebook renders directly.
+
+    Called by: main_interpret().
+    """
     import torch
     from captum.attr import visualization as viz
 
@@ -328,6 +381,11 @@ def process_examples(examples, model, tokenizer, lig, labels, device):
 
 
 def occlusion_section_html(title, occlusion_summaries):
+    """Renders the occlusion results as an HTML block -- per example, which tokens
+    cost the most predicted probability when removed.
+
+    Called by: main_interpret().
+    """
     html = f"<h2>{title}</h2>"
     for s in occlusion_summaries:
         html += (
@@ -341,9 +399,16 @@ def occlusion_section_html(title, occlusion_summaries):
 
 
 def main_interpret():
+    """Token attribution for a checkpoint: Integrated Gradients (captum) plus a
+    hand-rolled occlusion cross-check, over confident-wrong and confident-correct
+    examples. Writes interpretability.html and interpretability_data.json.
+
+    Called by: main(), via the "interpret" subcommand.
+    """
     import torch
     from transformers import AutoTokenizer, AutoModelForSequenceClassification
     from captum.attr import LayerIntegratedGradients
+    from captum.attr import visualization as viz   # used by the HTML writer below
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--task", choices=["8class", "3class"], required=True)
@@ -369,6 +434,10 @@ def main_interpret():
     print(correct_examples[["idx", "true_label", "pred_label", "confidence"]].to_string(index=False))
 
     def forward_fn(input_ids, attention_mask):
+        """Logits-only wrapper -- captum needs a plain tensor, not a HF output object.
+
+        Called by: captum, inside LayerIntegratedGradients.attribute().
+        """
         return model(input_ids=input_ids, attention_mask=attention_mask).logits
 
     lig = LayerIntegratedGradients(forward_fn, model.roberta.embeddings)
@@ -409,6 +478,12 @@ SPLIT_SEED = 42  # must match evaluate_checkpoints.py's SEED, which produced idx
 
 
 def build_test_examples_by_idx():
+    """Rebuilds the exact test example list so a CSV idx can be resolved back to
+    conversation_id / turn_index / problem_type. idx is positional, so this must
+    reproduce main_test's list exactly.
+
+    Called by: main_errorsample().
+    """
     convs = load_and_clean()
     examples = build_8class_examples(convs)
     _, _, test_examples = apply_conversation_level_split(convs, examples, seed=SPLIT_SEED)
@@ -416,6 +491,10 @@ def build_test_examples_by_idx():
 
 
 def load_predictions(csv_path):
+    """Reads test_predictions.csv into a list of dicts.
+
+    Called by: main_errorsample().
+    """
     with open(csv_path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
@@ -423,7 +502,10 @@ def load_predictions(csv_path):
 def select_by_confidence(wrong_sorted, n):
     """First-pass selection: the n most-confident wrong predictions. Kept
     because the report documents it -- and documents why it was replaced:
-    it over-represents one systematic failure mode (see selection_bias)."""
+    it over-represents one systematic failure mode (see selection_bias).
+
+    Called by: main_errorsample(), when --select confidence is passed.
+    """
     return wrong_sorted[:n]
 
 
@@ -431,7 +513,10 @@ def select_diverse(wrong_sorted, n):
     """The selection actually used: highest-confidence wrong prediction per
     distinct (true_label, pred_label) pair, then the top n of those. Gives a
     genuinely diverse set of confusions instead of repeating the same
-    closing-turn -> Others failure seven times."""
+    closing-turn -> Others failure seven times.
+
+    Called by: main_errorsample(), the default --select diverse.
+    """
     best = {}
     for r in wrong_sorted:
         key = (r["true_label"], r["pred_label"])
@@ -443,7 +528,10 @@ def select_diverse(wrong_sorted, n):
 def selection_bias(wrong_sorted, pred_label="Others"):
     """Quantifies the bias in pure top-N-by-confidence selection: the share of
     wrong predictions that predicted `pred_label`, within each confidence
-    percentile vs. the overall base rate. Source of Appendix F's table."""
+    percentile vs. the overall base rate. Source of Appendix F's table.
+
+    Called by: main_errorsample().
+    """
     total = len(wrong_sorted)
     out = []
     for pct in (1, 5, 10, 25):
@@ -456,6 +544,12 @@ def selection_bias(wrong_sorted, pred_label="Others"):
 
 
 def main_errorsample():
+    """Pulls the wrong test items for the hand-read error analysis and writes them
+    to error_analysis_sample.txt. Only selects candidates -- the diagnosis lines
+    are left blank for the user to fill in.
+
+    Called by: main(), via the "error-sample" subcommand.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--n", type=int, default=10)
     parser.add_argument(
@@ -531,6 +625,11 @@ COMMANDS = {
 
 
 def main():
+    """Subcommand dispatcher: prints usage if the command is missing or unknown,
+    otherwise strips it off sys.argv so each step keeps its own argparse.
+
+    Called by: the __main__ guard at the bottom of the file.
+    """
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         print("usage: python %s <command> [options]\n" % Path(__file__).name)
         print("commands:")

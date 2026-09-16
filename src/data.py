@@ -85,16 +85,28 @@ STRATEGY_TO_COARSE = {
 # --- Loading & cleaning ------------------------------------------------------
 
 def load_raw_conversations(path=DATA_PATH):
+    """Reads ESConv.json off disk, unmodified. Separate from load_and_clean so the
+    raw file is still reachable for comparison.
+
+    Called by: load_and_clean().
+    """
     with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
 def normalize_problem_type(problem_type):
+    """Applies PROBLEM_TYPE_MERGES; returns the value unchanged if not merged.
+
+    Called by: load_and_clean().
+    """
     return PROBLEM_TYPE_MERGES.get(problem_type, problem_type)
 
 
 def load_and_clean(path=DATA_PATH):
-    """Load raw conversations and apply known data-quality fixes."""
+    """Load raw conversations and apply known data-quality fixes.
+
+    Called by: run_invariants(), summary(), evaluate.py build_test_examples_by_idx(), evaluate.py main_test(), results.py build_test_examples_by_idx(), train_roberta.py main().
+    """
     conversations = load_raw_conversations(path)
     for conv in conversations:
         conv["problem_type"] = normalize_problem_type(conv["problem_type"])
@@ -104,14 +116,20 @@ def load_and_clean(path=DATA_PATH):
 # --- Turn structure & context construction -----------------------------------
 
 def get_runs(dialog):
-    """Segment a dialog into (speaker, turns) runs of consecutive same-speaker turns."""
+    """Segment a dialog into (speaker, turns) runs of consecutive same-speaker turns.
+
+    Called by: build_examples(), run_invariants().
+    """
     return [(speaker, list(group)) for speaker, group in itertools.groupby(dialog, key=lambda t: t["speaker"])]
 
 
 def get_context_for_supporter_turn(runs, run_idx, pos_in_run):
     """Context = the preceding seeker run + this supporter's own earlier
     turn(s) in the current burst. Returns [] only for a conversation's very
-    first turn being a supporter turn (dropped by build_examples)."""
+    first turn being a supporter turn (dropped by build_examples).
+
+    Called by: build_examples().
+    """
     context = []
     if run_idx > 0:
         _, prev_group = runs[run_idx - 1]
@@ -122,7 +140,10 @@ def get_context_for_supporter_turn(runs, run_idx, pos_in_run):
 
 
 def flatten_context(context_turns, include_speaker_tags=True):
-    """Render a list of turn dicts as a single text string for model input."""
+    """Render a list of turn dicts as a single text string for model input.
+
+    Called by: find_duplicate_examples(), run_invariants(), evaluate.py __init__(), evaluate.py main_test(), train_roberta.py __init__().
+    """
     if not include_speaker_tags:
         return " ".join(t["content"].strip() for t in context_turns)
     return " ".join(f"[{t['speaker']}] {t['content'].strip()}" for t in context_turns)
@@ -138,7 +159,10 @@ def build_examples(conversations):
 
     turn_index looked up via an identity-keyed index (id(turn)), not
     conv["dialog"].index(turn) -- see report_notes.md "AI was wrong" #4 for
-    the bug that fixed (duplicate turns broke .index())."""
+    the bug that fixed (duplicate turns broke .index()).
+
+    Called by: build_3class_examples(), build_8class_examples().
+    """
     examples = []
     for conv_id, conv in enumerate(conversations):
         dialog = conv["dialog"]
@@ -167,11 +191,18 @@ def build_examples(conversations):
 
 
 def build_8class_examples(conversations):
+    """Alias for build_examples -- exists so both tasks have parallel entry points.
+
+    Called by: run_invariants(), summary(), evaluate.py build_test_examples_by_idx(), results.py build_test_examples_by_idx().
+    """
     return build_examples(conversations)
 
 
 def build_3class_examples(conversations):
-    """Same as build_examples, but 'Others' turns are excluded (see STRATEGY_TO_COARSE)."""
+    """Same as build_examples, but 'Others' turns are excluded (see STRATEGY_TO_COARSE).
+
+    Called by: run_invariants(), summary().
+    """
     examples = [ex for ex in build_examples(conversations) if ex["gold_strategy"] in STRATEGY_TO_COARSE]
     for ex in examples:
         coarse = STRATEGY_TO_COARSE[ex["gold_strategy"]]
@@ -187,7 +218,10 @@ def find_duplicate_examples(examples):
     conversations (e.g. generic replies like "Ok, take care"). Detection
     only, not automatic removal -- see report_notes.md for the inspection
     and the decision to retain them (low-information-content, not leakage).
-    Returns {(context_text, gold_strategy): [examples]} for keys with >1 example."""
+    Returns {(context_text, gold_strategy): [examples]} for keys with >1 example.
+
+    Called by: summary().
+    """
     seen = {}
     for ex in examples:
         key = (flatten_context(ex["context"], include_speaker_tags=False), ex["gold_strategy"])
@@ -199,7 +233,10 @@ def find_duplicate_examples(examples):
 
 def conversation_level_split(conversations, train_frac=TRAIN_FRAC, val_frac=VAL_FRAC, seed=42):
     """Splits whole conversations into train/val/test. Returns three sets of
-    conversation_id (same convention as build_examples')."""
+    conversation_id (same convention as build_examples').
+
+    Called by: apply_conversation_level_split().
+    """
     n = len(conversations)
     indices = list(range(n))
     random.Random(seed).shuffle(indices)
@@ -214,11 +251,19 @@ def conversation_level_split(conversations, train_frac=TRAIN_FRAC, val_frac=VAL_
 
 
 def filter_examples_by_conversation_ids(examples, conversation_ids):
+    """Keeps only examples whose conversation is in the given id set. This is the
+    line that makes split leakage structurally impossible.
+
+    Called by: apply_conversation_level_split().
+    """
     return [ex for ex in examples if ex["conversation_id"] in conversation_ids]
 
 
 def apply_conversation_level_split(conversations, examples, train_frac=TRAIN_FRAC, val_frac=VAL_FRAC, seed=42):
-    """Convenience wrapper: split conversations, then filter a pre-built examples list by the result."""
+    """Convenience wrapper: split conversations, then filter a pre-built examples list by the result.
+
+    Called by: run_invariants(), summary(), evaluate.py build_test_examples_by_idx(), evaluate.py main_test(), results.py build_test_examples_by_idx(), train_roberta.py main().
+    """
     train_ids, val_ids, test_ids = conversation_level_split(conversations, train_frac, val_frac, seed)
     return (
         filter_examples_by_conversation_ids(examples, train_ids),
@@ -228,7 +273,10 @@ def apply_conversation_level_split(conversations, examples, train_frac=TRAIN_FRA
 
 
 def label_distribution(examples, label_key="gold_strategy"):
-    """Normalized label distribution (%) for a list of examples."""
+    """Normalized label distribution (%) for a list of examples.
+
+    Called by: compare_split_label_distributions().
+    """
     counts = Counter(ex[label_key] for ex in examples)
     total = sum(counts.values())
     return {label: 100 * count / total for label, count in counts.items()}
@@ -237,7 +285,10 @@ def label_distribution(examples, label_key="gold_strategy"):
 def compare_split_label_distributions(overall_examples, train, val, test, label_key="gold_strategy"):
     """Not stratified by design -- measures whether the per-split label
     distribution stays close to overall anyway. Returns {label: {overall,
-    train, val, test} percentages}."""
+    train, val, test} percentages}.
+
+    Called by: summary().
+    """
     overall_dist = label_distribution(overall_examples, label_key)
     train_dist = label_distribution(train, label_key)
     val_dist = label_distribution(val, label_key)
@@ -255,7 +306,10 @@ def compare_split_label_distributions(overall_examples, train, val, test, label_
 
 def random_utterance_split(examples, train_frac=TRAIN_FRAC, val_frac=VAL_FRAC, seed=42):
     """Splits individual examples independently, ignoring conversation
-    membership -- the leakage-prone comparison point, not for model selection."""
+    membership -- the leakage-prone comparison point, not for model selection.
+
+    Called by: summary().
+    """
     n = len(examples)
     indices = list(range(n))
     random.Random(seed).shuffle(indices)
@@ -277,6 +331,11 @@ FAILURES = []
 
 
 def check(name, condition, detail=""):
+    """Prints one PASS/FAIL line and records failures in FAILURES. Used instead of
+    assert so every check runs, not just up to the first failure.
+
+    Called by: run_invariants().
+    """
     status = "PASS" if condition else "FAIL"
     print(f"[{status}] {name}" + (f" -- {detail}" if detail and not condition else ""))
     if not condition:
@@ -284,6 +343,11 @@ def check(name, condition, detail=""):
 
 
 def run_invariants():
+    """Runs the eight whole-dataset invariant checks (see the module docstring for
+    what each verifies) and exits non-zero if any fail.
+
+    Called by: main().
+    """
     convs = load_and_clean()
     n_convs = len(convs)
     print(f"Loaded {n_convs} conversations.\n")
@@ -300,7 +364,6 @@ def run_invariants():
     cross_conv_violations = 0
     turn_index_mismatches = 0
     future_leakage_violations = 0
-    bad_empty_context = 0
     n_checked = 0
 
     for ex in ex8:
@@ -435,7 +498,10 @@ def run_invariants():
 # ========================================================================
 
 def summary():
-    """Example counts, duplicate check, and the split label distribution."""
+    """Example counts, duplicate check, and the split label distribution.
+
+    Called by: main().
+    """
     convs = load_and_clean()
     ex8 = build_8class_examples(convs)
     ex3 = build_3class_examples(convs)
@@ -460,6 +526,10 @@ def summary():
 
 
 def main():
+    """CLI entry point: --test runs the invariant checks, no flag runs the summary.
+
+    Called by: the __main__ guard at the bottom of the file.
+    """
     parser = argparse.ArgumentParser(description="ESConv data pipeline: examples + splits.")
     parser.add_argument("--test", action="store_true",
                         help="Run the whole-dataset invariant checks instead of the summary. "

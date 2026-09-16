@@ -27,13 +27,15 @@ Usage:
 """
 
 import argparse
+import csv
 import json
+import sys
 from collections import defaultdict
 from pathlib import Path
-import csv
-import sys
+
 import pandas as pd
-from openpyxl.styles import Font
+# openpyxl is imported inside write_xlsx() -- only the xlsx subcommand needs it,
+# so breakdown runs without it installed.
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from data import (
@@ -48,13 +50,20 @@ from data import (
 # ========================================================================
 
 def load_scores(json_path):
+    """Reads the judge's JSON scores.
+
+    Called by: main_breakdown().
+    """
     with open(json_path) as f:
         return json.load(f)
 
 
 def per_level_breakdown(scores):
     """Returns per_level_quality, per_level_adherence: {level: [scores]}.
-    PARSE_ERROR rows excluded, not treated as 0."""
+    PARSE_ERROR rows excluded, not treated as 0.
+
+    Called by: main_breakdown().
+    """
     per_level_quality = defaultdict(list)
     per_level_adherence = defaultdict(list)
     n_excluded = 0
@@ -71,7 +80,10 @@ def per_level_by_condition(gen_rows, scores):
     """Same breakdown, split by condition. Joined positionally (row i <->
     score i), not by an (idx, level) key -- that key isn't unique when a run
     carries both conditions, since both share idx+level for a turn (see
-    report_notes.md for the real bug this caused/fixed)."""
+    report_notes.md for the real bug this caused/fixed).
+
+    Called by: main_breakdown().
+    """
     per = defaultdict(lambda: defaultdict(lambda: {"quality": [], "adherence": []}))
     for gen, s in zip(gen_rows, scores):
         if s.get("quality") is None or s.get("strategy_adherence") is None:
@@ -82,6 +94,11 @@ def per_level_by_condition(gen_rows, scores):
 
 
 def main_breakdown():
+    """breakdown subcommand: prints mean quality and strategy adherence per prompt
+    level, split by condition when the run has more than one.
+
+    Called by: main(), via the "breakdown" subcommand.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument("--run", default="final_200",
                         help="Run prefix under outputs/genai/ (default: final_200).")
@@ -114,7 +131,6 @@ def main_breakdown():
     # --- Further split by condition, when the run carries more than one.
     # A single-condition run (predicted only) just reports that one column.
     if gen_csv_path.exists():
-        import csv
         with open(gen_csv_path, newline="", encoding="utf-8") as f:
             gen_rows = list(csv.DictReader(f))
         if len(gen_rows) == len(scores):
@@ -165,7 +181,10 @@ COLUMNS = [
 
 def build_test_examples_by_idx():
     """Reproduces the exact test_examples list evaluate_checkpoints.py used to
-    assign idx = range(len(test_examples)) -- see module docstring."""
+    assign idx = range(len(test_examples)) -- see module docstring.
+
+    Called by: main_xlsx().
+    """
     convs = load_and_clean()
     examples = build_8class_examples(convs)
     _, _, test_examples = apply_conversation_level_split(convs, examples, seed=SPLIT_SEED)
@@ -173,16 +192,31 @@ def build_test_examples_by_idx():
 
 
 def load_generation_rows(csv_path):
+    """Reads the generation CSV into a list of dicts, in file order -- the order the
+    positional join depends on.
+
+    Called by: main_xlsx().
+    """
     with open(csv_path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
 def load_judge_scores(json_path):
+    """Reads the judge scores in file order, to be joined positionally.
+
+    Called by: main_xlsx().
+    """
     with open(json_path) as f:
         return json.load(f)
 
 
 def assemble_rows(gen_rows, judge_scores, test_examples):
+    """Joins generations to judge scores by position (row i to score i) and looks up
+    each item's conversation metadata by idx. Positional because (idx, level,
+    strategy) isn't unique when both conditions are present.
+
+    Called by: main_xlsx().
+    """
     assert len(gen_rows) == len(judge_scores), (
         f"generation rows ({len(gen_rows)}) and judge scores ({len(judge_scores)}) "
         f"must be the same length for the positional join to be valid"
@@ -217,10 +251,17 @@ def assemble_rows(gen_rows, judge_scores, test_examples):
 
 
 def write_xlsx(records, out_path):
+    """Writes one deliverable spreadsheet and applies uniform Arial formatting with a
+    bold header row.
+
+    Called by: main_xlsx().
+    """
     df = pd.DataFrame(records, columns=COLUMNS)
     df.to_excel(out_path, index=False, sheet_name="responses")
 
     from openpyxl import load_workbook
+    from openpyxl.styles import Font
+
     wb = load_workbook(out_path)
     ws = wb["responses"]
     for row in ws.iter_rows():
@@ -234,6 +275,11 @@ def write_xlsx(records, out_path):
 
 
 def main_xlsx():
+    """xlsx subcommand: builds the two required deliverables, one per prompt level,
+    written to outputs/ itself rather than the genai working directory.
+
+    Called by: main(), via the "xlsx" subcommand.
+    """
     repo_root = Path(__file__).resolve().parent.parent
     genai_dir = repo_root / "outputs" / "genai"
     # The two required deliverables are written to outputs/ itself, not the
@@ -271,6 +317,11 @@ COMMANDS = {
 
 
 def main():
+    """Subcommand dispatcher: prints usage on an unknown command, otherwise strips it
+    off sys.argv so each step keeps its own argparse.
+
+    Called by: the __main__ guard at the bottom of the file.
+    """
     if len(sys.argv) < 2 or sys.argv[1] not in COMMANDS:
         print("usage: python %s <command> [options]\n" % Path(__file__).name)
         print("commands:")

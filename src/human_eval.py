@@ -51,7 +51,10 @@ HUMAN_WEIGHT_DEFAULT = 0.65
 
 def parse_quiz(quiz_text):
     """Returns {idx_str: {letter: (quality, strategy_adherence)}}. Block-based
-    (not line-based) -- see module docstring for the real bug this fixed."""
+    (not line-based) -- see module docstring for the real bug this fixed.
+
+    Called by: cmd_parse().
+    """
     chunks = ITEM_HEADER_RE.split(quiz_text)
     results = {}
     for i in range(1, len(chunks), 2):
@@ -71,6 +74,11 @@ def parse_quiz(quiz_text):
 
 
 def cmd_parse(genai_dir):
+    """parse subcommand: reads the hand-filled blind quiz, un-blinds the letters back
+    to prompt levels using the saved key, and writes full32_human_scores.csv.
+
+    Called by: main().
+    """
     quiz_path = genai_dir / "full32_scoring_quiz.txt"
     key_path = genai_dir / "full32_scoring_blind_key.json"
 
@@ -121,6 +129,11 @@ def cmd_parse(genai_dir):
 # --- kappa / QWK ----------------------------------------------------------
 
 def load_human_scores(path):
+    """Loads the hand scores keyed by (idx, level). Unscored rows are skipped, not
+    counted as zero. Returns (scores, total row count).
+
+    Called by: cmd_kappa().
+    """
     with open(path, newline="", encoding="utf-8") as f:
         rows = list(csv.DictReader(f))
     by_key = {}
@@ -135,6 +148,10 @@ def load_human_scores(path):
 
 
 def load_ai_scores(path):
+    """Loads the judge's JSON scores into a dict keyed by (idx, level).
+
+    Called by: cmd_kappa().
+    """
     with open(path) as f:
         entries = json.load(f)
     by_key = {}
@@ -144,7 +161,10 @@ def load_ai_scores(path):
 
 
 def cohens_kappa(pairs, rating_min=RATING_MIN, rating_max=RATING_MAX):
-    """Unweighted Cohen's kappa. pairs: list of (human_rating, ai_rating) ints."""
+    """Unweighted Cohen's kappa. pairs: list of (human_rating, ai_rating) ints.
+
+    Called by: cmd_kappa().
+    """
     n = len(pairs)
     if n == 0:
         return None
@@ -165,7 +185,10 @@ def cohens_kappa(pairs, rating_min=RATING_MIN, rating_max=RATING_MAX):
 
 def quadratic_weighted_kappa(pairs, rating_min=RATING_MIN, rating_max=RATING_MAX):
     """QWK -- same confusion-matrix machinery as Cohen's kappa, but weighted
-    by squared rating distance, appropriate for an ordinal 1-5 scale."""
+    by squared rating distance, appropriate for an ordinal 1-5 scale.
+
+    Called by: cmd_kappa().
+    """
     n = len(pairs)
     if n == 0:
         return None
@@ -188,10 +211,19 @@ def quadratic_weighted_kappa(pairs, rating_min=RATING_MIN, rating_max=RATING_MAX
 
 
 def normalize_1_5(x):
+    """Maps a 1-5 rating onto 0-1, for the weighted blend of human and AI scores.
+
+    Called by: cmd_kappa().
+    """
     return (x - RATING_MIN) / (RATING_MAX - RATING_MIN)
 
 
 def cmd_kappa(genai_dir, human_weight):
+    """kappa subcommand: computes Cohen's kappa and QWK between the hand scores and
+    the Gemini judge, on both quality and strategy adherence.
+
+    Called by: main().
+    """
     human_path = genai_dir / "full32_human_scores.csv"
     ai_path = genai_dir / "full32_judge_scores_gemini.json"
     if not human_path.exists():
@@ -312,6 +344,10 @@ def cmd_kappa(genai_dir, human_weight):
 
 
 def main():
+    """CLI entry point: dispatches to parse / kappa.
+
+    Called by: the __main__ guard at the bottom of the file.
+    """
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[2])
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("parse", help="Parse the hand-filled blind quiz into full32_human_scores.csv.")

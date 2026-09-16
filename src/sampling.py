@@ -57,11 +57,19 @@ COMBINED_FIELDNAMES = [
 
 
 def load_predictions(csv_path):
+    """Reads test_predictions.csv into a list of dicts.
+
+    Called by: cmd_final200(), cmd_hand32().
+    """
     with open(csv_path, newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
 
 
 def write_rows(out_path, rows, fieldnames):
+    """Writes selected rows to CSV, keeping only the named columns, in order.
+
+    Called by: cmd_final200(), cmd_hand32().
+    """
     with open(out_path, "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
@@ -72,6 +80,12 @@ def write_rows(out_path, rows, fieldnames):
 # --- hand32 ---------------------------------------------------------------
 
 def select_hand32(rows, n_per_cell=N_PER_CELL, seed=SEED):
+    """Picks the 32-item kappa/QWK sample, stratified by (true strategy, correct?)
+    so both right and wrong predictions are represented. Returns the selection and
+    any cells that couldn't be filled.
+
+    Called by: cmd_hand32().
+    """
     by_cell = defaultdict(list)
     for row in rows:
         cell = (row["true_label"], row["correct"] == "True")
@@ -91,6 +105,11 @@ def select_hand32(rows, n_per_cell=N_PER_CELL, seed=SEED):
 
 
 def cmd_hand32(repo_root):
+    """hand32 subcommand: writes hand_annotation_sample.csv, the 32-item sample used
+    for the human-vs-judge agreement check.
+
+    Called by: main().
+    """
     rows = load_predictions(repo_root / "outputs" / "8class" / "roberta" / "test_predictions.csv")
     selected, shortfalls = select_hand32(rows)
 
@@ -121,7 +140,10 @@ def cmd_hand32(repo_root):
 def largest_remainder_allocation(counts_by_strategy, total_pool_size, n_new):
     """Proportional allocation of n_new across strategies, by each strategy's
     share of the pool, using largest-remainder rounding so the per-strategy
-    counts sum to exactly n_new."""
+    counts sum to exactly n_new.
+
+    Called by: select_new().
+    """
     raw = {s: n_new * count / total_pool_size for s, count in counts_by_strategy.items()}
     floor_alloc = {s: int(v) for s, v in raw.items()}
     remainder = n_new - sum(floor_alloc.values())
@@ -133,6 +155,11 @@ def largest_remainder_allocation(counts_by_strategy, total_pool_size, n_new):
 
 
 def select_new(rows, exclude_idx, n_new=N_NEW, seed=SEED):
+    """Picks the 168 additional items for the 200-item run, excluding the 32 already
+    used and allocating across strategies in proportion to the pool.
+
+    Called by: cmd_final200().
+    """
     pool = [r for r in rows if r["idx"] not in exclude_idx]
     by_strategy = defaultdict(list)
     for r in pool:
@@ -155,6 +182,11 @@ def select_new(rows, exclude_idx, n_new=N_NEW, seed=SEED):
 
 
 def cmd_final200(repo_root):
+    """final200 subcommand: writes the 200-item production sample plus
+    final_200_new168.csv, the generation input for the 168 new items only.
+
+    Called by: main().
+    """
     genai_dir = repo_root / "outputs" / "genai"
     rows = load_predictions(repo_root / "outputs" / "8class" / "roberta" / "test_predictions.csv")
 
@@ -208,6 +240,14 @@ def cmd_final200(repo_root):
 # --- combine200 -----------------------------------------------------------
 
 def cmd_combine200(repo_root):
+    """combine200 subcommand: stitches the reused 32 pilot generations together with
+    the 168 new ones into the 400-row judging input, checking the two sets are
+    disjoint.
+
+    Called by: main().
+    """
+    # pandas only needed here -- hand32 / final200 are pure csv, so they run
+    # without it installed.
     import pandas as pd
 
     genai_dir = repo_root / "outputs" / "genai"
@@ -255,6 +295,10 @@ def cmd_combine200(repo_root):
 
 
 def main():
+    """CLI entry point: dispatches to hand32 / final200 / combine200.
+
+    Called by: the __main__ guard at the bottom of the file.
+    """
     parser = argparse.ArgumentParser(description="Build the GenAI runs' input CSVs.")
     sub = parser.add_subparsers(dest="cmd", required=True)
     sub.add_parser("hand32", help="32-item hand-annotation sample (kappa/QWK check).")
